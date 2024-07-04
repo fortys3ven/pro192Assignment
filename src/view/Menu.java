@@ -1,30 +1,32 @@
-package view;
+package View;
 
-import java.io.IOException;
+/**
+ *
+ * @author ASUS
+ */import controller.Utils;
 import java.util.ArrayList;
-import java.util.Scanner;
+import java.util.List;
+/**
+ *
+ * @author ASUS
+ */
 
 public abstract class Menu {
-    private String title;
+    private String Type;
     private ArrayList<String> choices;
 
-    public Menu() {
+    protected Menu(String type, String[] choices){
+        this.Type = type;
+        this.choices = new ArrayList<>();
+        this.choices.addAll(List.of(choices));
     }
 
-    public Menu(String title, String[] mchon) {
-        this.title = title;
-        choices = new ArrayList<>();
-        for (String m : mchon) {
-            choices.add(m);
-        }
+    public String getType() {
+        return Type;
     }
 
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
+    public void setType(String Type) {
+        this.Type = Type;
     }
 
     public ArrayList<String> getChoices() {
@@ -35,38 +37,43 @@ public abstract class Menu {
         this.choices = choices;
     }
 
-    //----------------------------------------------------
-    public void display() {
-        System.out.println(title);
-        System.out.println("-------------------");
-        for (int i = 0; i < choices.size(); i++) {
-            System.out.println((i + 1) + ". " + choices.get(i));
+
+    public void displayMenu(){
+        System.out.print("\n");
+        System.out.println(Type);
+        System.out.println("__________________________");
+        for(int i = 0; i < choices.size() - 1; i++){
+            System.out.println((i + 1) + "." + choices.get(i));
         }
-        System.out.println(choices.size() + 1 + ". quit");
-        System.out.println("-------------------");
+        System.out.println(0 + "." + choices.getLast());
+        System.out.println("__________________________");
     }
 
-    //----------------------------------------------------
-    public int getSelected() {
-        display();
-        Scanner sc = new Scanner(System.in);
-        System.out.print("Enter your choice: ");
-        return sc.nextInt();
+    public int getSelected(){
+        displayMenu();
+        return Utils.getValueNonNegativeInt("Enter your choice: ");
     }
+    public abstract void execute(int n);
 
-    //----------------------------------------------------
-    public abstract void execute(int ch);
-    //----------------------------------------------------
-
-    public void run() {
-        while (true) {
-            int ch = getSelected();
-            if (ch <= choices.size()) {
-                execute(ch);
-            } else {
+    public void run(){
+        while(true){
+            int choice = getSelected();
+            if(choice == 0){
+                execute(0);
                 break;
+            } else if(choice > 0){
+                execute(choice);
             }
         }
     }
-//----------------------------------------------------    
+
+
+
+    public void printMenu(){
+        displayMenu();
+    }
 }
+
+
+
+

@@ -1,125 +1,153 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
 package controller;
 
-import model.*;
-import view.Menu;
-
-import java.time.LocalDate;
+import View.Menu;
 import java.util.ArrayList;
 import java.util.Scanner;
+import model.*;
 
+/**
+ *
+ * @author NhatNS
+ */
 public class AdminApp extends Menu {
 
-    private Bank Bank;
-
-
-    ArrayList<Customer> customerList = Bank.getCustomerList();
-    public AdminApp() {
-        super("Admin Menu", new String[]{
-                "View All Customers",
-                "Add Customer",
-                "Remove Customer",
-                "Search Customer",
-                "View Transaction History"
-        });
-        Bank = new Bank();
-    }
-
     Scanner sc = new Scanner(System.in);
+    private Bank bankManagement;
 
-    public static void main(String[] args) {
-        AdminApp app = new AdminApp();
-    }
+    ArrayList<Customer> customerList;
 
-    public boolean login() {
-        System.out.println("usename: ");
-        String username = sc.nextLine();
-        System.out.println("pass: ");
-        String pass = sc.nextLine();
-        if (username == "admin" && pass == "admin") {
-            return true;
-        }
-        return false;
+    static String title = "Admin App";
+    static String[] listOfChoices = {"View All Customers", "Add Customer", "Remove Customer", "Search Customer", "View Transaction History"};
+
+    public AdminApp(Bank bankManagement) {
+        super(title, listOfChoices);
+        this.bankManagement = bankManagement;
     }
 
     @Override
-    public void execute(int ch) {
-        switch (ch) {
-            case 1:
+    public void execute(int choice) {
+        switch (choice) {
+            case 1 ->
                 displayAllCustomer();
-                break;
-            case 2:
-                addCustomer();
-                break;
-            case 3:
+            case 2 -> {
+                try {
+                    addCustomer();
+                } catch (IllegalArgumentException e) {
+                    System.out.println(e.getMessage());
+                }
+            }
+            case 3 ->
                 removeCustomer();
-                break;
-            case 4:
+            case 4 ->
                 searchCustomer();
-                break;
-            case 5:
-//                viewTransaction();
-                break;
-            default:
+            case 5 -> {
+                // viewTransaction();
+
+            }
+            default ->
                 System.out.println("invalid choices");
-                break;
-        }
-        if (login()) {
-            run();
-        } else {
-            System.out.println("wrong username or password!");
         }
     }
 
     private void displayAllCustomer() {
-        Bank.displayCustomeList(customerList);
+        bankManagement.displayCustomeList(customerList);
     }
 
-    private void addCustomer() {
-        System.out.println("Enter customer details:");
-        System.out.print("Username: ");
-        String username = sc.nextLine();
-        System.out.print("Password: ");
-        String password = sc.nextLine();
-        System.out.print("Full Name: ");
-        String fullname = sc.nextLine();
-        System.out.print("Phone: ");
-        String phone = sc.nextLine();
-        System.out.print("Mail: ");
-        String mail = sc.nextLine();
-        System.out.print("CCCD: ");
-        String cccd = sc.nextLine();
-        System.out.print("STK: ");
-        String stk = sc.nextLine();
-        System.out.print("Date of Birth (dd/MM/yyyy): ");
-        String dob = sc.nextLine();
-        System.out.println("Blance: ");
-        Double soDuTaiKhoan = sc.nextDouble();
-        Customer customer = new Customer(username, password, fullname, phone, mail, cccd, stk, dob, soDuTaiKhoan);
-        Bank.addNewCustomer(customer);
+    private void addCustomer() throws IllegalArgumentException {
+        String userName = Utils.getValue("Enter user-name: ");
+        while (true) {
+            boolean check = false;
+            for (Customer cus : bankManagement.getCustomerList()) {
+                if (userName.equals(cus.getUsername())) {
+                    check = true;
+                    break;
+                }
+            }
+            if (check) {
+                System.out.println("The user-name of customer must be unique.");
+                userName = Utils.getValue("Enter user-name: ");
+            } else {
+                break;
+            }
+        }
+        String passWord = Utils.getValue("Enter pass-word (password include 8 digit, at least 1 Upper-case, number and special character): ");
+        String name = Utils.getValue("Enter full-name: ");
+        String dobs = Utils.getValue("Enter date of birth(dd/MM/yyyy): ");
+        String phone = Utils.getValue("Enter phone(the phone must be 9 or 10 digit): ");
+        String mail = Utils.getValue("Enter mail: ");
+        String id = Utils.getValue("Enter id: ");
+        while (true) {
+            boolean check = false;
+            for (Customer cus : bankManagement.getCustomerList()) {
+                if (id.equals(cus.getCccd())) {
+                    check = true;
+                    break;
+                }
+            }
+            if (check) {
+                System.out.println("The idof customer must be unique.");
+                id = Utils.getValue("Enter id: ");
+            } else {
+                break;
+            }
+        }
+        String stk = Utils.getValue("Enter Stk: ");
+        while (true) {
+            boolean check = false;
+            for (Customer cus : bankManagement.getCustomerList()) {
+                if (stk.equals(cus.getSTK())) {
+                    check = true;
+                    break;
+                }
+            }
+            if (check) {
+                System.out.println("The stk of customer must be unique.");
+                stk = Utils.getValue("Enter stk: ");
+            } else {
+                break;
+            }
+        }
+
+        bankManagement.addNewCustomer(new Customer(userName, passWord, name, dobs, phone, mail, id, stk, stk));
     }
 
     private void removeCustomer() {
-        System.out.print("Enter customer username to remove: ");
-        String username = sc.nextLine();
-        Bank.deleteCustomer(username);
+        String userName = Utils.getValue("Enter customer username to remove: ");
+        bankManagement.deleteCustomer(userName);
     }
 
     private void searchCustomer() {
-        System.out.print("Enter to search: 1)By Username, 2)Byname, 3)By CCCD: ");
-        int i = sc.nextInt();
-        System.out.println("Enter name to search: ");
-        String name = sc.nextLine();
-        switch (i) {
-            case 1:
-                System.out.println(Bank.searchCustomerByUserName(name));
-                break;
-            case 2:
-                System.out.println(Bank.searchCustomerByName(name));
-                break;
-            case 3:
-                System.out.println(Bank.searchCustomerByCCCD(name));
-                break;
-        }
+        String[] searchMenuchoice = {"Search by user-name", "Search by name", "Search by ID", "Back to main menu"};
+        Menu searchMenu = new Menu("Search Menu", searchMenuchoice) {
+            @Override
+            public void execute(int choice) {
+                switch (choice) {
+                    case 1:
+                        String userName = Utils.getValue("Enter user-name: ");
+                        bankManagement.displayCustomeList(bankManagement.searchCustomerByUserName(userName));
+                        break;
+                    case 2:
+                        String name = Utils.getValue("Enter name: ");
+                        bankManagement.displayCustomeList(bankManagement.searchCustomerByName(name));
+                        break;
+                    case 3:
+                        String id = Utils.getValue("Enter id: ");
+                        bankManagement.displayCustomeList(bankManagement.searchCustomerByCCCD(id));
+                        break;
+                    case 0:
+                        System.out.println("Exiting...");
+                        break;
+                    default:
+                        System.out.println("Invalid choice. Please enter option correctly.");
+                        break;
+                }
+            }
+        };
+        searchMenu.run();
     }
 
 }

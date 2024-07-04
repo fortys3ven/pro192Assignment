@@ -5,9 +5,9 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 
 public class Customer {
-
 
     private String username;
     private String password;
@@ -19,7 +19,7 @@ public class Customer {
     private String STK;
     private Double soDuTaiKhoan;
 
-    public Customer( String username, String password, String fullName, String dob, String phone, String mail, String cccd, String STK, Double soDuTaiKhoan) {
+    public Customer(String username, String password, String fullName, String dob, String phone, String mail, String cccd, String STK, String soDuTaiKhoan)throws IllegalArgumentException {
 
         this.username = username;
         this.password = password;
@@ -29,20 +29,20 @@ public class Customer {
         this.mail = mail;
         this.cccd = cccd;
         this.STK = STK;
-        this.soDuTaiKhoan = soDuTaiKhoan;
+        setSoduTaiKhoanStr(soDuTaiKhoan);
     }
 
     public final void setDobByString(String dob) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         try {
-            LocalDate dobi = LocalDate.parse(dob);
+            LocalDate dobi = LocalDate.parse(dob, formatter);
             if (Period.between(dobi, LocalDate.now()).getYears() >= 16) {
                 this.dob = dobi;
             } else {
-                System.out.println("Customer must be at least 16 years old.");
+                System.out.println("The old of customer must be greater 16.");
             }
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
+        } catch (DateTimeParseException e) {
+            System.out.println("Invalid format. The date of birth of customer need to use the form(dd/MM/yyyy).");
         }
     }
 
@@ -71,7 +71,7 @@ public class Customer {
         return phone != null && phone.matches(regex);
     }
 
-    public void setPassword(String password) {
+    public void setPassword(String password) throws IllegalArgumentException{
         if (isValidPassword(password)) {
 //            this.password = hashPassword(password);
             this.password = password;
@@ -80,8 +80,7 @@ public class Customer {
         }
     }
 
-
-    public void setPhone(String phone) {
+    public void setPhone(String phone) throws IllegalArgumentException {
         if (isValidPhone(phone)) {
             this.phone = phone;
         } else {
@@ -89,7 +88,7 @@ public class Customer {
         }
     }
 
-    public void setMail(String mail) {
+    public void setMail(String mail) throws IllegalArgumentException{
         if (isValidMail(mail)) {
             this.mail = mail;
         } else {
@@ -116,6 +115,19 @@ public class Customer {
     public void setSoDuTaiKhoan(Double soDuTaiKhoan) {
         this.soDuTaiKhoan = soDuTaiKhoan;
     }
+    
+    public void setSoduTaiKhoanStr(String sodutaikhoan) throws IllegalArgumentException{
+        try{
+            double sodu = Double.parseDouble(sodutaikhoan);
+            if(sodu < 0){
+                throw new IllegalArgumentException("So du tai khoan phai lon hon hoac bang 0.");
+            } else {
+                this.soDuTaiKhoan = sodu;
+            }
+        } catch(IllegalArgumentException e){
+            throw new IllegalAccessError("So du tai khoan phai la so tu nhien va lon hon 0.");
+        }
+    }
 
     public String getUsername() {
         return username;
@@ -127,6 +139,11 @@ public class Customer {
 
     public String getFullName() {
         return fullName;
+    }
+    
+    public String getFirstName(){
+        String[] nameParts = fullName.split(" ");
+        return nameParts[nameParts.length - 1];
     }
 
     public LocalDate getDob() {
@@ -153,27 +170,8 @@ public class Customer {
         return soDuTaiKhoan;
     }
 
-//    private String hashPassword(String password) {
-//        try {
-//            MessageDigest md = MessageDigest.getInstance("SHA-256");
-//            byte[] hash = md.digest(password.getBytes());
-//            StringBuilder hexString = new StringBuilder(2 * hash.length);
-//            for (byte b : hash) {
-//                String hex = Integer.toHexString(0xff & b);
-//                if (hex.length() == 1) {
-//                    hexString.append('0');
-//                }
-//                hexString.append(hex);
-//            }
-//            return hexString.toString();
-//        } catch (NoSuchAlgorithmException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
-
-    public void display() {
-        System.out.println("Full name: " + fullName);
-        System.out.println("So tai khoan: " + STK);
-        System.out.println("So du: " + soDuTaiKhoan);
-    }
+    @Override
+    public String toString() {
+        return String.format("|%-7s|%-15s|%-11s|%-13s|%-20s|%-11s|\n", username, fullName,STK, cccd, mail, phone);
+    }      
 }
