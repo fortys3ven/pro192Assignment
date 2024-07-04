@@ -22,6 +22,21 @@ public class CustomerApp extends Menu {
         });
         sc = new Scanner(System.in);
     }
+    public boolean login() {
+        System.out.println("Enter username:");
+        String username = sc.nextLine();
+        System.out.println("Enter password:");
+        String password = sc.nextLine();
+
+        if (bank.authenticateCustomer(username, password)) {
+            customer = bank.getCustomerByUserName(username);
+            System.out.println("Login successful.");
+            return true;
+        } else {
+            System.out.println("Login failed.");
+            return false;
+        }
+    }
 
     @Override
     public void execute(int choice) {
@@ -44,6 +59,11 @@ public class CustomerApp extends Menu {
             default:
                 System.out.println("Invalid choice.");
                 break;
+        }
+        if (login()) {
+            run();
+        } else {
+            System.out.println("wrong username or password!");
         }
     }
 
@@ -104,6 +124,6 @@ public class CustomerApp extends Menu {
         Bank bank = new Bank();
 
         CustomerApp app = new CustomerApp();
-        app.run();
+
     }
 }

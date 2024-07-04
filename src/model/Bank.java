@@ -13,7 +13,13 @@ public class Bank {
     public ArrayList<Customer> getCustomerList() {
         return customerList;
     }
-    
+    public boolean authenticateCustomer(String username, String password) {
+        Customer customer = getCustomerByUserName(username);
+        if (customer != null) {
+            return password.equals(customer.getPassword());
+        }
+        return false;
+    }
    
     public void addNewCustomer(Customer newCustomer){
         customerList.add(newCustomer);
