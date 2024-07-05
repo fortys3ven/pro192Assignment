@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 
 public class Customer {
 
@@ -15,21 +16,25 @@ public class Customer {
     private LocalDate dob;
     private String phone;
     private String mail;
-    private String cccd;
-    private String STK;
-    private Double soDuTaiKhoan;
+    private String id;
+    private String numberAccount;
+    private Double balance;
+    private ArrayList<Transaction> transactions;
+    
+    public Customer(){};
 
     public Customer(String username, String password, String fullName, String dob, String phone, String mail, String cccd, String STK, String soDuTaiKhoan)throws IllegalArgumentException {
 
         this.username = username;
-        this.password = password;
+        setPassword(password);
         this.fullName = fullName;
         setDobByString(dob);
-        this.phone = phone;
-        this.mail = mail;
-        this.cccd = cccd;
-        this.STK = STK;
+        setPhone(phone);
+        setMail(mail);
+        this.id = cccd;
+        this.numberAccount = STK;
         setSoduTaiKhoanStr(soDuTaiKhoan);
+        this.transactions = new ArrayList<>();
     }
 
     public final void setDobByString(String dob) {
@@ -105,27 +110,27 @@ public class Customer {
     }
 
     public void setCccd(String cccd) {
-        this.cccd = cccd;
+        this.id = cccd;
     }
 
     public void setSTK(String STK) {
-        this.STK = STK;
+        this.numberAccount = STK;
     }
 
     public void setSoDuTaiKhoan(Double soDuTaiKhoan) {
-        this.soDuTaiKhoan = soDuTaiKhoan;
+        this.balance = soDuTaiKhoan;
     }
     
     public void setSoduTaiKhoanStr(String sodutaikhoan) throws IllegalArgumentException{
         try{
             double sodu = Double.parseDouble(sodutaikhoan);
             if(sodu < 0){
-                throw new IllegalArgumentException("So du tai khoan phai lon hon hoac bang 0.");
+                throw new IllegalArgumentException("Balance must be greater or equal 0.");
             } else {
-                this.soDuTaiKhoan = sodu;
+                this.balance = sodu;
             }
         } catch(IllegalArgumentException e){
-            throw new IllegalAccessError("So du tai khoan phai la so tu nhien va lon hon 0.");
+            throw new IllegalArgumentException("Balance must be greater or equal 0.");
         }
     }
 
@@ -159,19 +164,26 @@ public class Customer {
     }
 
     public String getCccd() {
-        return cccd;
+        return id;
     }
 
-    public String getSTK() {
-        return STK;
+    public String getNumberAccount() {
+        return numberAccount;
     }
 
     public Double getSoDuTaiKhoan() {
-        return soDuTaiKhoan;
+        return balance;
     }
 
+    public ArrayList<Transaction> getTransaction(){
+        return this.transactions;
+    }
+    
+    public void addTransaction(Transaction transaction){
+        transactions.add(transaction);
+    }
     @Override
     public String toString() {
-        return String.format("|%-7s|%-15s|%-11s|%-13s|%-20s|%-11s|\n", username, fullName,STK, cccd, mail, phone);
+        return String.format("|%-10s|%-15s|%-11s|%-13s|%-20s|%-11s|\n", username, fullName,numberAccount, id, mail, phone);
     }      
 }

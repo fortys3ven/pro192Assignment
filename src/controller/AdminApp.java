@@ -15,13 +15,10 @@ import model.*;
  */
 public class AdminApp extends Menu {
 
-    Scanner sc = new Scanner(System.in);
     private Bank bankManagement;
 
-    ArrayList<Customer> customerList;
-
     static String title = "Admin App";
-    static String[] listOfChoices = {"View All Customers", "Add Customer", "Remove Customer", "Search Customer", "View Transaction History"};
+    static String[] listOfChoices = {"View All Customers", "Add Customer", "Remove Customer", "Search Customer", "View Transaction History", "Quit."};
 
     public AdminApp(Bank bankManagement) {
         super(title, listOfChoices);
@@ -45,8 +42,7 @@ public class AdminApp extends Menu {
             case 4 ->
                 searchCustomer();
             case 5 -> {
-                // viewTransaction();
-
+                viewTransaction();
             }
             default ->
                 System.out.println("invalid choices");
@@ -54,65 +50,120 @@ public class AdminApp extends Menu {
     }
 
     private void displayAllCustomer() {
-        bankManagement.displayCustomeList(customerList);
+        bankManagement.displayCustomeList(bankManagement.getCustomerList());
     }
 
-    private void addCustomer() throws IllegalArgumentException {
-        String userName = Utils.getValue("Enter user-name: ");
-        while (true) {
-            boolean check = false;
-            for (Customer cus : bankManagement.getCustomerList()) {
-                if (userName.equals(cus.getUsername())) {
-                    check = true;
-                    break;
-                }
-            }
-            if (check) {
-                System.out.println("The user-name of customer must be unique.");
-                userName = Utils.getValue("Enter user-name: ");
-            } else {
+    public void addCustomer() throws IllegalArgumentException {
+        Customer cus = new Customer();
+        String userName = getUniqueUserName();
+        String passWord;
+        while(true){
+            passWord = Utils.getValue("Enter pass-word (password include 8 digit, at least 1 Upper-case, number and special character): ");
+            if(cus.isValidPassword(passWord)){
                 break;
+            } else {
+                System.out.println("Invalid format. Please Enter again.");
             }
         }
-        String passWord = Utils.getValue("Enter pass-word (password include 8 digit, at least 1 Upper-case, number and special character): ");
         String name = Utils.getValue("Enter full-name: ");
-        String dobs = Utils.getValue("Enter date of birth(dd/MM/yyyy): ");
-        String phone = Utils.getValue("Enter phone(the phone must be 9 or 10 digit): ");
-        String mail = Utils.getValue("Enter mail: ");
-        String id = Utils.getValue("Enter id: ");
-        while (true) {
-            boolean check = false;
-            for (Customer cus : bankManagement.getCustomerList()) {
-                if (id.equals(cus.getCccd())) {
-                    check = true;
-                    break;
-                }
-            }
-            if (check) {
-                System.out.println("The idof customer must be unique.");
-                id = Utils.getValue("Enter id: ");
-            } else {
+        String dobs;
+        while(true){
+            dobs = Utils.normalizeDate(Utils.getValue("Enter date of birth (dd/mm/yyyy): "));
+            if(dobs != null){
                 break;
-            }
-        }
-        String stk = Utils.getValue("Enter Stk: ");
-        while (true) {
-            boolean check = false;
-            for (Customer cus : bankManagement.getCustomerList()) {
-                if (stk.equals(cus.getSTK())) {
-                    check = true;
-                    break;
-                }
-            }
-            if (check) {
-                System.out.println("The stk of customer must be unique.");
-                stk = Utils.getValue("Enter stk: ");
             } else {
-                break;
+                System.out.println("Invalid format. Please enter again.");
             }
         }
 
-        bankManagement.addNewCustomer(new Customer(userName, passWord, name, dobs, phone, mail, id, stk, stk));
+        String phone;
+        while(true){
+            phone = Utils.getValue("Enter phone(the phone must be 9 or 10 digit): ");
+            if(cus.isValidPhone(phone)){
+                break;
+            } else {
+                System.out.println("Invalid format. Please enter again.");
+            }
+        }
+        String mail;
+        while(true){
+            mail = Utils.getValue("Enter mail(@gmail.com: ");
+            if(cus.isValidMail(mail)){
+                break;
+            } else {
+                System.out.println("Invalid format. Please enter again.");
+            }
+        }
+        String id = getUniqueId();
+        String stk = getUniqueNumberAccount();
+
+        bankManagement.addNewCustomer(new Customer(userName, passWord, name, dobs, phone, mail, id, stk, "0"));
+    }
+
+    public String getUniqueUserName() {
+        String userName;
+        while (true) {
+            userName = Utils.getValue("Enter user name: ");
+            boolean isUnique = true;
+
+            for (Customer cus : bankManagement.getCustomerList()) {
+                if (cus.getUsername().equals(userName)) {
+                    isUnique = false;
+                    break;
+                }
+            }
+
+            if (isUnique) {
+                break;
+            } else {
+                System.out.println("The user name must be unique.");
+            }
+        }
+        return userName;
+    }
+    
+    public String getUniqueId() {
+        String id;
+        while (true) {
+            id = Utils.getValue("Enter id: ");
+            boolean isUnique = true;
+
+            for (Customer cus : bankManagement.getCustomerList()) {
+                if (cus.getCccd().equals(id)) {
+                    isUnique = false;
+                    break;
+                }
+            }
+
+            if (isUnique) {
+                break;
+            } else {
+                System.out.println("The id must be unique.");
+            }
+        }
+        return id;
+    }
+    
+    public String getUniqueNumberAccount() {
+        String numberAccount;
+        while (true) {
+            numberAccount = Utils.getValue("Enter number Account: ");
+            boolean isUnique = true;
+
+            for (Customer cus : bankManagement.getCustomerList()) {
+                if (cus.getNumberAccount().equals(numberAccount)) {
+                    isUnique = false;
+                    break;
+                }
+            }
+
+            if (isUnique) {
+                break;
+            } else {
+                System.out.println("The number account must be unique.");
+            }
+        }
+        return numberAccount;
     }
 
     private void removeCustomer() {
@@ -148,6 +199,23 @@ public class AdminApp extends Menu {
             }
         };
         searchMenu.run();
+    }
+
+    public void viewTransaction() {
+        String numberAccount = Utils.getValue("Enter account-number: ");
+        Customer check = null;
+        for(Customer cus : bankManagement.getCustomerList()){
+            if(cus.getNumberAccount().equals(numberAccount)){
+                check = cus;
+                break;
+            }
+        }
+        
+        if(check != null){
+            System.out.println(check.getTransaction());
+        } else {
+            System.out.println("Customer not found with the given number account.");
+        }
     }
 
 }

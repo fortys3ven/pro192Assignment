@@ -4,9 +4,8 @@
  */
 package controller;
 
-import java.util.Scanner;
+import View.Menu;
 import model.*;
-import view.Menu;
 
 /**
  *
@@ -14,21 +13,25 @@ import view.Menu;
  */
 public class MainScreen extends Menu {
 
-    private static Bank bankManagement = new Bank();
-    private Scanner sc = new Scanner(System.in);
+    private Bank bankManagement;
 
     static String title = "Main Screen";
-    static String[] listOfChoices = {"Create Account", "Login"};
+    static String[] listOfChoices = {"Create Account", "Login", "Quit."};
 
     public MainScreen() {
         super(title, listOfChoices);
+        bankManagement = new Bank();
     }
 
     @Override
     public void execute(int choice) {
         switch (choice) {
             case 1 -> {
-                createAccount();
+                try {
+                   createAccount(); 
+                } catch (IllegalArgumentException e){
+                    System.out.println(e.getMessage());
+                }
             }
             case 2 -> {
                 login();
@@ -40,61 +43,33 @@ public class MainScreen extends Menu {
     }
 
     private void createAccount() {
-        System.out.println("Enter customer details:");
-        System.out.print("Username: ");
-        String username = sc.nextLine();
-        System.out.print("Password: ");
-        String password = sc.nextLine();
-        System.out.print("Full Name: ");
-        String fullname = sc.nextLine();
-        System.out.print("Phone: ");
-        String phone = sc.nextLine();
-        System.out.print("Mail: ");
-        String mail = sc.nextLine();
-        System.out.print("CCCD: ");
-        String cccd = sc.nextLine();
-        System.out.print("STK: ");
-        String stk = sc.nextLine();
-        System.out.print("Date of Birth (dd/MM/yyyy): ");
-        String dob = sc.nextLine();
-        System.out.print("Balance: ");
-        double balance = sc.nextDouble();
-        sc.nextLine();  // Consume newline left-over
-
-        Customer customer = new Customer(username, password, fullname, phone, mail, cccd, stk, dob, balance);
-        bankManagement.addNewCustomer(customer);
-
-        System.out.println("Account created successfully.");
+        AdminApp admin = new AdminApp(bankManagement);
+        admin.addCustomer();
     }
 
     private void login() {
-        Menu loginMenu = new Menu("Select Mode", new String[]{"Admin", "Standard"}) {
+        Menu loginMenu = new Menu("Select Mode", new String[]{"Admin", "Customer","Back to main screen."}) {
             @Override
             public void execute(int choice) {
                 switch (choice) {
                     case 1 -> {
-                        System.out.print("Enter admin username: ");
-                        String username = sc.nextLine();
-                        System.out.print("Enter admin password: ");
-                        String password = sc.nextLine();
-
-                        Admin admin = bankManagement.getAdminByUserName(username);
-                        if (admin != null && admin.getPassword().equals(password)) {
-                            AdminApp adminApp = new AdminApp(admin);
+                        System.out.println("Admin login:");
+                        String userNameAdmin = Utils.getValue("Enter admin username: ");
+                        String passWordAdmin = Utils.getValue("Enter admin password: ");
+                        if (bankManagement.getBankUser().equals(userNameAdmin) && bankManagement.getBankPassWord().equals(passWordAdmin)) {
+                            AdminApp adminApp = new AdminApp(bankManagement);
                             adminApp.run();
                         } else {
                             System.out.println("Invalid admin username or password.");
                         }
                     }
                     case 2 -> {
-                        System.out.print("Enter customer username: ");
-                        String username = sc.nextLine();
-                        System.out.print("Enter customer password: ");
-                        String password = sc.nextLine();
+                        String userNameCustomer = Utils.getValue("Enter customer username: ");
+                        String passWordCustomer = Utils.getValue("Enter customer password: ");
 
-                        Customer customer = bankManagement.getCustomerByUserName(username);
-                        if (customer != null && customer.getPassword().equals(password)) {
-                            CustomerApp customerApp = new CustomerApp(customer);
+                        Customer customer = bankManagement.getCustomerByUserName(userNameCustomer);
+                        if (customer != null && customer.getPassword().equals(passWordCustomer)) {
+                            CustomerApp customerApp = new CustomerApp(customer, bankManagement);
                             customerApp.run();
                         } else {
                             System.out.println("Invalid customer username or password.");

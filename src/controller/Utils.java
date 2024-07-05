@@ -8,9 +8,13 @@ package controller;
  *
  * @author ASUS
  */
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Scanner;
 
 /**
@@ -126,6 +130,42 @@ public class Utils {
                 System.out.println("Invalid input. Please enter 'true' for Male or 'false' for Female.");
             }
         }
+    }
+    
+    public static boolean isValidDate(String date) {
+        if (date == null) {
+            return false;
+        }
+        String[] parts = date.split("/");
+        int d = Integer.parseInt(parts[0]);
+        int m = Integer.parseInt(parts[1]);
+        int y = Integer.parseInt(parts[2]);
+        int maxd = 31;
+        if (d < 1 || d > 31 || m < 1 || m > 12) {
+            return false;
+        }
+        if (m == 4 || m == 6 || m == 9 || m == 11) {
+            maxd = 30;
+        } else if (m == 2) {
+            if (y % 100 == 0 || (y % 4 == 0 && y % 100 != 0)) {
+                maxd = 29;
+            } else {
+                maxd = 28;
+            }
+        }
+        return d <= maxd;
+    }
+
+    public static String normalizeDate(String dateString) {
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+        try {
+            LocalDate date = LocalDate.parse(dateString, inputFormatter);
+            return date.format(outputFormatter);
+        } catch (DateTimeParseException e) {
+        }
+        return null;
     }
 }
 
