@@ -32,7 +32,7 @@ public class Customer {
         setPhone(phone);
         setMail(mail);
         this.id = cccd;
-        this.numberAccount = STK;
+        setNumberAccount(STK);
         setSoduTaiKhoanStr(soDuTaiKhoan);
         this.transactions = new ArrayList<>();
     }
@@ -74,6 +74,18 @@ public class Customer {
     public boolean isValidPhone(String phone) {
         String regex = "^(\\d{9}|\\d{10})$";
         return phone != null && phone.matches(regex);
+    }
+
+    public boolean isValidNumberAccount(String numberAccount){
+        String regex = "^SE\\d{5}$";
+        return numberAccount != null && numberAccount.matches(regex);
+    }
+
+    public void setNumberAccount(String numberAccount){
+        if(isValidNumberAccount(numberAccount)){
+            this.numberAccount = numberAccount;
+        }else 
+            throw new IllegalArgumentException("Number Account must follow format SE00000");
     }
 
     public void setPassword(String password) throws IllegalArgumentException{
